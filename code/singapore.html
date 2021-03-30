@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <title>Singapore</title>  <!-- a title for the webpage tab -->
+        
+        <!-- Set up the style of the map (i.e. size) and text for the web page -->
+        <style type="text/css">
+			html, body { height: 100%; margin: 15px; padding: 0; font-family: Georgia, 'Times New Roman', Times, serif;}
+			#map { height: 70%; width: 80%; margin-left: auto; margin-right: auto; font-family: Georgia, 'Times New Roman', Times, serif;}
+		</style>
+        
+        <!-- ACCESS the code that runs Leaflet from the web -->
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+            integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+            crossorigin=""/>
+        
+        <!-- Leaflet JavaScript Library -->
+        <!-- Make sure you put this AFTER Leaflet's CSS -->
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+            integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+            crossorigin=""></script>
+
+       <script src="../assets/Singapore/singapore-neighborhoods.geojson"></script>
+        <script src="../assets/Singapore/pokemarts.geojson"></script>
+        <script src="../assets/Singapore/pokemon-centers.geojson"></script>
+        <script src="../assets/Singapore/routes.geojson"></script>
+        
+        <!-- The Main JavaScript Code Block that will run our map -->
+        <script> 
+
+        // Basemap layer for your map -- many more choices here: https://leaflet-extras.github.io/leaflet-providers/preview/
+        var Stamen_Watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+	       attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	       subdomains: 'abcd',
+	       minZoom: 1,
+	       maxZoom: 16,
+	       ext: 'jpg'
+            });
+            var Stamen_TerrainBackground = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.{ext}', {
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                subdomains: 'abcd',
+                minZoom: 0,
+                maxZoom: 18,
+                ext: 'png'
+            });
+            
+            
+            var OpenStreetMap_HOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>'
+            });
+            
+            var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	           attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            });
+            
+            var Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+	           attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+            });
+            
+            var Esri_NatGeoWorldMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+	           attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+	           maxZoom: 16
+            });
+           
+            var baseMaps = {
+                "<b>OSM Streets</b>": OpenStreetMap_HOT,
+                "<b>ESRI World Imagery</b>": Esri_WorldImagery,
+                "<b>ESRI World Street Map</b>": Esri_WorldStreetMap,
+                "<b>ESRI Nat Geo World Map</b>": Esri_NatGeoWorldMap,
+                "<b>Watercolor</b>": Stamen_Watercolor,
+                "<b>Background</b>": Stamen_TerrainBackground,
+            }
+               
+            // icons
+            var pokeCenter = L.icon({
+                iconUrl: '../assets/Singapore/icons/pokemon-center.png',
+                iconSize: [25, 25],
+                iconAnchor: [12, 12],
+                popupAnchor: [0, -12]
+            });
+            var pokeMart = L.icon({
+                iconUrl: '../assets/Singapore/icons/poke-mart.png',
+                iconSize: [25, 25],
+                iconAnchor: [12, 12],
+                popupAnchor: [0, -12]
+            });
+            var neighborhood = L.icon({
+                iconUrl: '../assets/Singapore/icons/building.svg',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -20]
+            });
+
+            // pokemon
+            var dewgong = L.icon({
+                iconUrl: '../assets/Singapore/icons/Dewgong.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            var pheromosa = L.icon({
+                iconUrl: '../assets/Singapore/icons/pheromosa.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            var rattata = L.icon({
+                iconUrl: '../assets/Singapore/icons/rattata.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            var sandshrew = L.icon({
+                iconUrl: '../assets/Singapore/icons/sandshrew.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            var treecko = L.icon({
+                iconUrl: '../assets/Singapore/icons/treecko.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            var vulpix = L.icon({
+                iconUrl: '../assets/Singapore/icons/vulpix.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25],
+                popupAnchor: [0, -25]
+            });
+
+            // markers
+
+            var sandshrewMarker = new L.Marker([1.385166, 103.800289],
+                {
+                    icon: sandshrew,
+                }
+            )
+            sandshrewMarker.bindPopup("Sandshrew is based off of the pangolin. Believe or not, they can be found in Singapore! Although they are strugging due to habitat loss, they can be found in places such as this one, which is a nature reserve.", {});
+
+            var pheromosaMarker = new L.Marker([1.349671, 103.868623],
+                {
+                    icon: pheromosa,
+                }
+            )
+            
+            pheromosaMarker.bindPopup("The beautiful pheromosa is based off one of the world's most hated bugs, the cockroach. Cockroaches are famous for living just about anywhere, and Singapore is no exception. Be careful when opening your trash chute! One might fly out at you.", {});
+        
+            
+            var rattataMarker = new L.Marker([1.391630, 103.705395],
+                {
+                    icon: rattata,
+                }
+            )
+            
+            rattataMarker.bindPopup("Rats, rats, we're the rats! \n Just like every other city, rats can be found in Singapore, despite the strict sanitation standards. While Rattata makes an excellent friend, its generally advised to stay away from rats as they can be dangerous.", {});
+
+            var dewgongMarker = new L.Marker([1.404043, 103.997698],
+                {
+                    icon: dewgong,
+                }
+            )
+            
+            dewgongMarker.bindPopup("Although rare, dugongs, which dewgong is based off of, can be spotted off the coast of Singapore. While dewgongs are ice-type pokemon that love the cold, the water in Singapore is actually quite warm.", {});
+        
+
+            var treeckoMarker = new L.Marker([1.330932, 103.694966],
+                {
+                    icon: treecko,
+                }
+            )
+            
+            treeckoMarker.bindPopup("Many amphibians can be found in Singapore! One example is the gecko. While Treecko is actually a wood gecko, which are found in Australia, there plenty of his cousins, the common house geckos, reside in Singapore. They can often be found inside human apartments. Just don't scare them or they might drop their tails!", {});
+        
+            var vulpixMarker = new L.Marker([1.403962, 103.791233],
+                {
+                    icon: vulpix,
+                }
+            )
+            
+            vulpixMarker.bindPopup("The adorable vulpix was based off of the red fox! While these furry friends are not native to Singapore, a red fox was found wandering around Hong Kong now resides at the Singapore Zoo. He was believed to have been illegally imported to Hong Kong and had gotten lost. Hopefully he feels safe in his new home!", {});
+        
+            // marker group
+            var pokemon = L.layerGroup([sandshrewMarker, pheromosaMarker, rattataMarker, dewgongMarker, treeckoMarker, vulpixMarker]);
+            // marts
+            function popupsMart(feature, layer) {
+                layer.bindPopup("Lots of supermarkets near here!")
+            };
+
+            // marts
+            var martPoints = new L.geoJson(pokemarts, {
+                pointToLayer: function(feature, latlng){
+                    return new L.Marker(latlng, {
+                        icon: pokeMart,
+                    });
+                }, onEachFeature: popupsMart
+            });
+
+            // centers
+            function popupsCenter(feature, layer) {
+                layer.bindPopup("Lots of hawker centers near here!")
+            };
+
+            // centers
+            var centerPoints = new L.geoJson(pokecenters, {
+                pointToLayer: function(feature, latlng){
+                    return new L.Marker(latlng, {
+                        icon: pokeCenter,
+                    });
+                }, onEachFeature: popupsCenter
+            });
+            // stations 
+
+            function popupsStations(feature, layer) {
+                layer.bindPopup("<h3>" + feature.properties.Name + "</h3> <p> You can earn badge number <b>" + feature.properties.num + "</b> here!</p>");
+            };
+
+            var neighborhoods = new L.geoJson(names, {
+                pointToLayer: function(feature, latlng){
+                    return new L.Marker(latlng, {
+                        icon: neighborhood,
+                    });
+                },
+                onEachFeature: popupsStations,
+            })
+            
+            // routes
+            function lineSymbology (feature) {
+                return {
+                    color: "#4d0000",
+                    weight: 4,
+                    opacity: 1,
+                };
+            }
+
+            var routesLines = L.geoJson(routes, {style: lineSymbology});
+            // all overlays
+            var overLays = {
+                "<b>Poke Marts</b>" : martPoints,
+                "<b>Poke Centers</b>" : centerPoints,
+                "<b>Stations</b>" : neighborhoods,
+                "<b>Routes</b>" : routesLines,
+                "<b>Pokemon</b>" : pokemon,
+            }
+                        
+            // Set up function to build the map
+            function initialize() {
+                
+                // This creates the map
+                var map = L.map('map', {
+                    center: [1.39016,103.842],  // this sets the center of the map [lat, lon]
+                    zoom: 11,                    // this sets the zoom level of the map when it loads
+                    layers: [Stamen_Watercolor]   // this defines the base map
+
+                });
+
+                L.control.layers(baseMaps, overLays, {collapsed: false}).addTo(map);
+
+            // End initialize() function
+            }
+        </script>
+    </head>
+    
+    <body onload="initialize()">  <!-- run the initiialize() function when the page loads -->
+        <h1>Singapore</h1>  <!-- Title above the map -->
+        
+        <div id="map"></div>   <!-- Object that contains the map -- placed after the title so that it is below the title -->
+        <div> Pokemon Center from <a href="https://pwo-wiki.info/images/c/c2/Pokemon_Center_Exterior.png">pwo-wiki.info</a></body></div>
+        <div> Poke Mart from <a href="https://cdn.bulbagarden.net/upload/9/9b/Pok%C3%A9_Mart_FRLG.png">bulbagarden.net</a> </div>
+        <div>pokemon images from <a href="https://bulbapedia.bulbagarden.net/wiki/Main_Page">bulbapedia</a> </div>
+        <div>City icons made by <a href="https://www.flaticon.com/authors/smalllikeart" title="smalllikeart">smalllikeart</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        <div>
+            Animal Info Sources:
+            <li><a href="https://www.nparks.gov.sg/gardens-parks-and-nature/dos-and-donts/animal-advisories/pangolins"> Pangolin </a></li>
+            <li><a href="http://www.wildsingapore.com/wildfacts/vertebrates/mammals/dugong.htm"> Dugong </a></li>
+            <li><a href="https://www.straitstimes.com/lifestyle/red-fox-found-wandering-in-hong-kong-has-new-home-here">Red Fox</a></li>
+        </div>
+        <div>
+            Data sources: (note, most of the data was altered from their original forms or used only as an inspiration for the final project)
+            <li>2019 Master Plan Rail Station</li>
+            <li>Hawker Centres</li>
+            <li>Supermarkets</li>
+            <li>2019 Master Plan Rail Line</li>
+            <li>Resident population by planning area subzone</li>
+            <li>2014 Planning area boundary</li>
+            <li>2019 Master Plan Rail Station Layer</li>
+            <li>2019 Master Plan Rail Station Text</li>
+            Each of these datasets were provided by the Singapore government through the <a href="https://data.gov.sg/">Singapore Public Data Portal</a>
+        </div>
+</html>
